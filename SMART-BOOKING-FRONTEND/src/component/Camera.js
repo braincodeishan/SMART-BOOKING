@@ -6,10 +6,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import PhotoCameraRoundedIcon from "@material-ui/icons/PhotoCameraRounded";
 import Alert from './subComponent/Alert';
 import Loading from './subComponent/Loading'
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: "100%",
+    minHeight: "50vh",
     textAlign: 'center',
   },
   imgBox: {
@@ -30,8 +31,10 @@ const useStyles = makeStyles((theme) => ({
 function Camera(props) {
   const classes = useStyles();
   const [encoded, setencoded] = useState("");
+  const [mySource, setmySource] = useState("");
   const [alert, setalert] = useState({ status: 400, message: "" });
   const [isLoading, setisLoading] = useState(false);
+  let navigate = useNavigate();
 
   const handleCapture = (target) => {
     setisLoading(true)
@@ -47,20 +50,36 @@ function Camera(props) {
         }
         reader.readAsDataURL(file);
         const newUrl = URL.createObjectURL(file);
-        props.setSource(newUrl);
+        setmySource(newUrl);
       }
     }
     setisLoading(false)
   };
+
   const retake = () => {
     setencoded("");
-    props.setSource("");
+    setmySource("")
+    const updatedData = {
+      from: {
+        Name: "",
+        Pincode: "",
+        Mobile: "",
+        Address: ""
+      },
+      to: {
+        Name: "",
+        Pincode: "",
+        Mobile: "",
+        Address: ""
+      }
+    }
+    props.setSource(updatedData);
   }
 
   const fetchAPI = async () => {
     setisLoading(true)
     // const key = "https://vision.googleapis.com/v1/images:annotate?key=AIzaSyA7u3yyCgCScPmfvmgLI0Egdw3i1UtGoA4"
-    const key = "http://localhost:3001/contact"
+    const key = "https://jsonplaceholder.typicode.com/posts"
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -90,17 +109,17 @@ function Camera(props) {
 
     const res = await fetch(key, requestOptions)
     const result = await res.json();
-    console.log(res)
+    // console.log(res)
     console.log(result);
-    if (res.status === 200) {
+    if (res.status === 201) {
       setalert({ status: 200, message: "Data successfully converted" })
+      const datas = "TO\nNAME\nISHAN DEV\nPINCODE\n518 002\nМOBILE\n888 2263 883\nADDRESS\nC-130/507\nPRAKASH NAGAR\nPOSTAL COLONY\nKURNOOL\nFROM\nNAME\nCHINNA BABU\nPINCODE\n514013\nМOBILE\n9494305721\nADDRESS\nIP TECHNOLOGY\nCIRCLE OFFICE\nVIJAYA WADA\n"
+      dataModification(datas)
       setTimeout(() => {
         setalert({ status: 400, message: "" })
         setisLoading(false)
-
+        navigate('/View')
       }, 2000);
-
-
 
     } else {
       setalert({ status: 200, message: "Something Went wrong" })
@@ -108,13 +127,109 @@ function Camera(props) {
         setalert({ status: 400, message: "" })
         setisLoading(false)
       }, 2000);
-
-
     }
 
   }
 
+  const dataModification = (data) => {
+    var str = "";
+    let toIndex = 0;
+    let fromIndex = 0;
+    let toDataIndex = { Name: 0, Pin: 0, Mobile: 0, Address: 0 }
+    let fromDataIndex = { Name: 0, Pin: 0, Mobile: 0, Address: 0 }
+    let myToData = { Name: "", Pin: "", Mobile: "", Address: "" }
+    let myFromData = { Name: "", Pin: "", Mobile: "", Address: "" }
 
+    let data1 = data.split(/\r\n|\r|\n/)
+    console.log(data1);
+    data1.map((val, index) => {
+      if (val === "TO") {
+        toIndex = index;
+      } else if (val === "FROM") {
+        fromIndex = index;
+      }
+    })
+    data1.map((val, index) => {
+      if (val === 'NAME' && index < fromIndex) {
+        toDataIndex.Name = index;
+      } else if (val === 'NAME' && index > fromIndex) {
+        fromDataIndex.Name = index;
+      }
+      if (val === 'PINCODE' && index < fromIndex) {
+        toDataIndex.Pin = index;
+      } else if (val === 'PINCODE' && index > fromIndex) {
+        fromDataIndex.Pin = index;
+      }
+      if ((val === 'МOBILE' || val === 'MOBILE') && index < fromIndex) {
+        toDataIndex.Mobile = index;
+      } else if ((val === 'МOBILE' || val === 'MOBILE') && index > fromIndex) {
+        fromDataIndex.Mobile = index;
+      }
+      if (val === 'ADDRESS' && index < fromIndex) {
+        toDataIndex.Address = index;
+      } else if (val === 'ADDRESS' && index > fromIndex) {
+        fromDataIndex.Address = index;
+      }
+    })
+    data1.map((val, index) => {
+      if (index > toDataIndex.Name && index < toDataIndex.Pin) {//TO name
+
+        myToData.Name = myToData.Name + val + " ";
+
+      } else if (index > toDataIndex.Pin && index < toDataIndex.Mobile) {//TO PIN
+
+        myToData.Pin = myToData.Pin + val + " ";
+
+      } else if (index > toDataIndex.Mobile && index < toDataIndex.Address) {//TO MOBILE
+
+        myToData.Mobile = myToData.Mobile + val + " ";
+
+      } else if (index > toDataIndex.Address && index < fromIndex) { //TO ADDRESS
+
+        myToData.Address = myToData.Address + val + " ";
+
+      } else if (index > fromDataIndex.Name && index < fromDataIndex.Pin) {  //FROM NAME
+
+        myFromData.Name = myFromData.Pin + val + " ";
+
+      } else if (index > fromDataIndex.Pin && index < fromDataIndex.Mobile) {  //FROM PIN
+
+        myFromData.Pin = myFromData.Pin + val + " ";
+
+      } else if (index > fromDataIndex.Mobile && index < fromDataIndex.Address) {  //FROM MOBILE
+
+        myFromData.Mobile = myFromData.Mobile + val + " ";
+
+      } else if (index > fromDataIndex.Address) {  //FROM ADDRESS
+
+        myFromData.Address = myFromData.Address + val + " ";
+
+      }
+    })
+
+    console.log("from index" + fromIndex);
+    // console.log(toDataIndex);
+    console.log(toDataIndex);
+    console.log(myToData);
+    console.log(fromDataIndex);
+    console.log(myFromData);
+    const updatedData = {
+      from: {
+        Name: myFromData.Name,
+        Pincode: myFromData.Pin,
+        Mobile: myFromData.Mobile,
+        Address: myFromData.Address
+      },
+      to: {
+        Name: myToData.Name,
+        Pincode: myToData.Pin,
+        Mobile: myToData.Mobile,
+        Address: myToData.Address
+      }
+    }
+    props.setSource(updatedData);
+
+  }
 
 
 
@@ -126,9 +241,9 @@ function Camera(props) {
         <Grid container>
           <Grid item xs={12}>
             <h5>Capture your image</h5>
-            {props.source &&
+            {mySource &&
               <Box display="flex" justifyContent="center" border={1} className={classes.imgBox}>
-                <img src={props.source} alt={"snap"} className={classes.img}></img>
+                <img src={mySource} alt={"snap"} className={classes.img}></img>
               </Box>}
             <input
               accept="image/*"
@@ -138,7 +253,7 @@ function Camera(props) {
               capture="environment"
               onChange={(e) => handleCapture(e.target)}
             />
-            {!props.source && <label htmlFor="icon-button-file">
+            {!mySource && <label htmlFor="icon-button-file">
               <IconButton
                 color="primary"
                 aria-label="upload picture"
@@ -148,7 +263,7 @@ function Camera(props) {
               </IconButton>
 
             </label>}
-            {props.source && <section>
+            {mySource && <section>
               <div className='d-flex flex-row justify-content-center align-items-center'>
                 <div className='d-flex flex-column p-3 m-3 hover-aqua' onClick={retake}>
                   <i className='bx bx-exit bx-rotate-180' ></i>
@@ -160,6 +275,7 @@ function Camera(props) {
                 </div>
               </div>
             </section>}
+            
           </Grid>
         </Grid>
 
