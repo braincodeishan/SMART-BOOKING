@@ -78,8 +78,8 @@ function Camera(props) {
 
   const fetchAPI = async () => {
     setisLoading(true)
-    // const key = "https://vision.googleapis.com/v1/images:annotate?key=AIzaSyA7u3yyCgCScPmfvmgLI0Egdw3i1UtGoA4"
-    const key = "https://jsonplaceholder.typicode.com/posts"
+    const key = "https://vision.googleapis.com/v1/images:annotate?key=AIzaSyA7u3yyCgCScPmfvmgLI0Egdw3i1UtGoA4"
+    // const key = "https://jsonplaceholder.typicode.com/posts"
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -87,7 +87,7 @@ function Camera(props) {
       "requests": [
         {
           "image": {
-            "content": "encoded"
+            "content": encoded
           },
           "features": [
             {
@@ -111,9 +111,11 @@ function Camera(props) {
     const result = await res.json();
     // console.log(res)
     console.log(result);
-    if (res.status === 201) {
+    console.log(result.responses[0].fullTextAnnotation.text);
+    if (res.status === 200) {
       setalert({ status: 200, message: "Data successfully converted" })
-      const datas = "TO\nNAME\nISHAN DEV\nPINCODE\n518 002\nМOBILE\n888 2263 883\nADDRESS\nC-130/507\nPRAKASH NAGAR\nPOSTAL COLONY\nKURNOOL\nFROM\nNAME\nCHINNA BABU\nPINCODE\n514013\nМOBILE\n9494305721\nADDRESS\nIP TECHNOLOGY\nCIRCLE OFFICE\nVIJAYA WADA\n"
+      const datas=result.responses[0].fullTextAnnotation.text
+      // const datas = "TO\nNAME\nISHAN DEV\nPINCODE\n518 002\nМOBILE\n888 2263 883\nADDRESS\nC-130/507\nPRAKASH NAGAR\nPOSTAL COLONY\nKURNOOL\nFROM\nNAME\nCHINNA BABU\nPINCODE\n514013\nМOBILE\n9494305721\nADDRESS\nIP TECHNOLOGY\nCIRCLE OFFICE\nVIJAYA WADA\n"
       dataModification(datas)
       setTimeout(() => {
         setalert({ status: 400, message: "" })
@@ -132,8 +134,8 @@ function Camera(props) {
   }
 
   const dataModification = (data) => {
-    var str = "";
-    let toIndex = 0;
+    // var str = "";
+    // let toIndex = 0;
     let fromIndex = 0;
     let toDataIndex = { Name: 0, Pin: 0, Mobile: 0, Address: 0 }
     let fromDataIndex = { Name: 0, Pin: 0, Mobile: 0, Address: 0 }
@@ -143,34 +145,109 @@ function Camera(props) {
     let data1 = data.split(/\r\n|\r|\n/)
     console.log(data1);
     data1.map((val, index) => {
-      if (val === "TO") {
-        toIndex = index;
-      } else if (val === "FROM") {
+      if (val === "FROM") {
         fromIndex = index;
       }
     })
     data1.map((val, index) => {
-      if (val === 'NAME' && index < fromIndex) {
-        toDataIndex.Name = index;
-      } else if (val === 'NAME' && index > fromIndex) {
-        fromDataIndex.Name = index;
+      
+      
+      if(index < fromIndex){
+
+        if(val === 'NAME'|| 
+        (val.includes("N")&&val.includes("ME"))|| 
+        (val.includes("NA")&& val.includes("E"))|| 
+        val.includes("NAM")){
+          toDataIndex.Name = index;
+        }
+
+        if((val === 'PINCODE' ||
+        val.includes("INCODE")||
+        (val.includes("P")&&val.includes("NCODE"))||
+        (val.includes("PI")&&val.includes("CODE"))||
+        (val.includes("PIN")&&val.includes("ODE"))||
+        (val.includes("PINC")&&val.includes("DE"))||
+        (val.includes("PINCO")&&val.includes("E"))||
+        val.includes("PINCOD")
+        )){
+          toDataIndex.Pin = index;
+        }
+
+        if((val === 'MOBILE'||
+        val.includes("OBILE")||
+        (val.includes("M")&&val.includes("BILE"))||
+        (val.includes("MO")&&val.includes("ILE"))||
+        (val.includes("MOB")&&val.includes("LE"))||
+        (val.includes("MOBI")&&val.includes("E"))||
+        val.includes("MOBIL")
+        )){
+          toDataIndex.Mobile= index;
+        }
+
+        if((val === 'ADDRESS'||
+        val.includes("DDRESS")||
+        (val.includes("A")&&val.includes("DRESS"))||
+        (val.includes("AD")&&val.includes("RESS"))||
+        (val.includes("ADD")&&val.includes("ESS"))||
+        (val.includes("ADDR")&&val.includes("SS"))||
+        (val.includes("ADDRE")&&val.includes("S"))||
+        val.includes("ADDRES")      
+        )){
+          toDataIndex.Address= index;
+        }
+
+
+      }else{
+
+        if(val === 'NAME'|| 
+        (val.includes("N")&&val.includes("ME"))|| 
+        (val.includes("NA")&& val.includes("E"))|| 
+        val.includes("NAM")){
+          fromDataIndex.Name= index;
+        }
+
+        if((val === 'PINCODE' ||
+        val.includes("INCODE")||
+        (val.includes("P")&&val.includes("NCODE"))||
+        (val.includes("PI")&&val.includes("CODE"))||
+        (val.includes("PIN")&&val.includes("ODE"))||
+        (val.includes("PINC")&&val.includes("DE"))||
+        (val.includes("PINCO")&&val.includes("E"))||
+        val.includes("PINCOD")
+        )){
+          fromDataIndex.Pin= index;
+        }
+
+        if((val === 'MOBILE'||
+        val.includes("OBILE")||
+        (val.includes("M")&&val.includes("BILE"))||
+        (val.includes("MO")&&val.includes("ILE"))||
+        (val.includes("MOB")&&val.includes("LE"))||
+        (val.includes("MOBI")&&val.includes("E"))||
+        val.includes("MOBIL")
+        )){
+          fromDataIndex.Mobile= index;
+        }
+
+        if((val === 'ADDRESS'||
+        val.includes("DDRESS")||
+        (val.includes("A")&&val.includes("DRESS"))||
+        (val.includes("AD")&&val.includes("RESS"))||
+        (val.includes("ADD")&&val.includes("ESS"))||
+        (val.includes("ADDR")&&val.includes("SS"))||
+        (val.includes("ADDRE")&&val.includes("S"))||
+        val.includes("ADDRES")      
+        )){
+          fromDataIndex.Address= index;
+        }
+
       }
-      if (val === 'PINCODE' && index < fromIndex) {
-        toDataIndex.Pin = index;
-      } else if (val === 'PINCODE' && index > fromIndex) {
-        fromDataIndex.Pin = index;
-      }
-      if ((val === 'МOBILE' || val === 'MOBILE') && index < fromIndex) {
-        toDataIndex.Mobile = index;
-      } else if ((val === 'МOBILE' || val === 'MOBILE') && index > fromIndex) {
-        fromDataIndex.Mobile = index;
-      }
-      if (val === 'ADDRESS' && index < fromIndex) {
-        toDataIndex.Address = index;
-      } else if (val === 'ADDRESS' && index > fromIndex) {
-        fromDataIndex.Address = index;
-      }
+      
     })
+
+
+
+    
     data1.map((val, index) => {
       if (index > toDataIndex.Name && index < toDataIndex.Pin) {//TO name
 
