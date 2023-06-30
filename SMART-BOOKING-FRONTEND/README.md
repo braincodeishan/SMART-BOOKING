@@ -69,8 +69,4 @@ If you have any questions, feel free to reach out to the project maintainers:
 
 ---
 
-Modify the content as per your specific application's details, dependencies, and contributors. Provide clear instructions for installation, usage, and contribution. Also, make sure to include appropriate acknowledgements and licensing information.
 
-Remember to replace the placeholder links (`example-link-to-library`, `example-link-to-algorithm`) with actual links to relevant libraries or algorithms used in your application.
-
-I hope this helps, and best of luck with your React app!
