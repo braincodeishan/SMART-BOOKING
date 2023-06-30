@@ -1,4 +1,3 @@
-Sure! Here's an example of a README file for your React app:
 
 # Barcode Scanner and Route Planning App
 
